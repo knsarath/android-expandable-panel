@@ -27,6 +27,22 @@ public class ExpandablePanel extends LinearLayout {
     private int mAnimationDuration;
     private boolean initiallyCollapsed = true;
 
+    public interface CollapseExpandListener {
+        void onCollapseStarted();
+
+        void onCollapseFinished();
+
+        void onExpandStarted();
+
+        void onExpandFinished();
+    }
+
+    public void setCollapseExpandListener(CollapseExpandListener collapseExpandListener) {
+        mCollapseExpandListener = collapseExpandListener;
+    }
+
+    CollapseExpandListener mCollapseExpandListener;
+
     public void setUseDefaultHeaderView(boolean useDefaultHeaderView) {
         mUseDefaultHeaderView = useDefaultHeaderView;
         if (mUseDefaultHeaderView) {
@@ -165,10 +181,9 @@ public class ExpandablePanel extends LinearLayout {
         }
     }
 
-    public static void expand(final View v, long animationDuration) {
+    public void expand(final View v, long animationDuration) {
         v.measure(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         final int targetHeight = v.getMeasuredHeight();
-
         // Older versions of android (pre API 21) cancel animations for views with a height of 0.
         v.getLayoutParams().height = 1;
         v.setVisibility(View.VISIBLE);
@@ -186,11 +201,31 @@ public class ExpandablePanel extends LinearLayout {
                 return true;
             }
         };
+
+        if (mCollapseExpandListener != null) {
+            a.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    mCollapseExpandListener.onExpandStarted();
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mCollapseExpandListener.onExpandFinished();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+        }
+
         a.setDuration(animationDuration);
         v.startAnimation(a);
     }
 
-    public static void collapse(final View v, long animationDuration) {
+    public void collapse(final View v, long animationDuration) {
         final int initialHeight = v.getMeasuredHeight();
 
         Animation a = new Animation() {
@@ -210,7 +245,24 @@ public class ExpandablePanel extends LinearLayout {
             }
         };
 
-        // 1dp/ms
+        if (mCollapseExpandListener != null) {
+            a.setAnimationListener(new Animation.AnimationListener() {
+                @Override
+                public void onAnimationStart(Animation animation) {
+                    mCollapseExpandListener.onCollapseStarted();
+                }
+
+                @Override
+                public void onAnimationEnd(Animation animation) {
+                    mCollapseExpandListener.onCollapseFinished();
+                }
+
+                @Override
+                public void onAnimationRepeat(Animation animation) {
+
+                }
+            });
+        }
         a.setDuration(animationDuration);
         v.startAnimation(a);
     }
