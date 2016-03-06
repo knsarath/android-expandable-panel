@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <declare-styleable name="ExpandablePanel">
+        <attr name="headerView" format="reference"/>
+        <attr name="content_view" format="reference"/>
+        <attr name="useDefaultHeaderView" format="boolean"/>
+        <attr name="expandAnimationDuration" format="integer"/>
+    </declare-styleable>
+</resources>
