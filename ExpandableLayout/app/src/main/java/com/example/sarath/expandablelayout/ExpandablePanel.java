@@ -23,8 +23,9 @@ public class ExpandablePanel extends LinearLayout {
     private LinearLayout mHeaderContainerView;
     private boolean mIsCollapsed = true;
     private boolean mUseDefaultHeaderView = true;
-    private String mSwitchId = "expand_collapse_switch";
+    private String mSwitchId;
     private int mAnimationDuration;
+    private boolean initiallyCollapsed = true;
 
     public void setUseDefaultHeaderView(boolean useDefaultHeaderView) {
         mUseDefaultHeaderView = useDefaultHeaderView;
@@ -72,7 +73,13 @@ public class ExpandablePanel extends LinearLayout {
                 attrs,
                 R.styleable.ExpandablePanel);
         try {
-
+            initiallyCollapsed = attributeSet.getBoolean(R.styleable.ExpandablePanel_initiallyCollapsed, initiallyCollapsed);
+            if (initiallyCollapsed) {
+                mContentContainerView.getLayoutParams().height = 0;
+                mIsCollapsed = true;
+            } else {
+                mIsCollapsed = false;
+            }
             mUseDefaultHeaderView = attributeSet.getBoolean(R.styleable.ExpandablePanel_useDefaultHeaderView, true);
             mSwitchId = attributeSet.getString(R.styleable.ExpandablePanel_expandCollapseSwitchId);
             if (mUseDefaultHeaderView) {
@@ -106,8 +113,8 @@ public class ExpandablePanel extends LinearLayout {
             mCollapseExpandSwitch.setOnClickListener(new OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    mIsCollapsed = !mIsCollapsed;
                     expandOrCollapse();
+                    mIsCollapsed = !mIsCollapsed;
                 }
             });
         }

@@ -6,5 +6,6 @@
         <attr name="useDefaultHeaderView" format="boolean"/>
         <attr name="expandAnimationDuration" format="integer"/>
         <attr name="expandCollapseSwitchId" format="string"/>
+        <attr name="initiallyCollapsed" format="boolean"/>
     </declare-styleable>
 </resources>

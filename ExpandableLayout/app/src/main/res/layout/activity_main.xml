@@ -16,5 +16,6 @@
         app:headerView="@layout/test_header_view"
         app:useDefaultHeaderView="false"
         app:expandAnimationDuration="300"
+        app:initiallyCollapsed="false"
         />
 </LinearLayout>
