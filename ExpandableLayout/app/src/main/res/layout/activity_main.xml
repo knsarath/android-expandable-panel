@@ -11,10 +11,10 @@
         android:id="@+id/main_parent"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:content_view="@layout/test_content_view"
+        app:content_view="@layout/content_view"
         app:expandCollapseSwitchId="switch2"
         app:headerView="@layout/test_header_view"
-        app:useDefaultHeaderView="false"
+        app:useDefaultHeaderView="true"
         app:expandAnimationDuration="300"
         app:initiallyCollapsed="false"
         />

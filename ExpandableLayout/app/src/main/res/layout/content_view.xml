@@ -8,12 +8,16 @@
         android:id="@+id/exp"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:useDefaultHeaderView="false"
+        app:headerView="@layout/test_header_view"
+        app:expandCollapseSwitchId="switch0"
         app:content_view="@layout/test_content_view">
     </com.example.sarath.expandablelayout.ExpandablePanel>
     <com.example.sarath.expandablelayout.ExpandablePanel
         android:id="@+id/exp11"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:useDefaultHeaderView="true"
         app:content_view="@layout/test_content_view">
     </com.example.sarath.expandablelayout.ExpandablePanel>
 
@@ -21,6 +25,7 @@
         android:id="@+id/exp12"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        app:useDefaultHeaderView="true"
         app:content_view="@layout/test_content_view">
     </com.example.sarath.expandablelayout.ExpandablePanel>
 
