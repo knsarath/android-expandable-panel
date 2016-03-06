@@ -1,6 +1,7 @@
 package com.example.sarath.expandablelayout;
 
 import android.content.Context;
+import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
@@ -12,22 +13,45 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 public class ExpandablePanel extends LinearLayout {
-    private static final long ANIMATION_DURATION = 500;
-    private TextView mHeaderText;
-    private TextView mSubHeader;
-    private ImageView mCollapseExpandSwitch;
+    public static final int DEFAULT_ANIMATION_DURATION = 500;
+    private TextView mDefaultHeaderTextView;
+    private TextView mDefaultSubHeaderTextView;
+    private View mCollapseExpandSwitch;
     private View mContentView;
     private View mHeaderView;
     private LinearLayout mContentContainerView;
     private LinearLayout mHeaderContainerView;
     private boolean mIsCollapsed = true;
     private boolean mUseDefaultHeaderView = true;
+    private String mSwitchId = "expand_collapse_switch";
+    private int mAnimationDuration;
 
+    public void setUseDefaultHeaderView(boolean useDefaultHeaderView) {
+        mUseDefaultHeaderView = useDefaultHeaderView;
+        if (mUseDefaultHeaderView) {
+            setHeaderLayout(R.layout.default_header_view);
+            View switchView = mHeaderView.findViewById(R.id.expand_collapse_switch);
+            setCollapseExpandSwitch(switchView);
+        } else {
+            setHeaderLayout(mHeaderView);
+        }
+
+    }
+
+    public void setAnimationDuration(int animationDuration) {
+        mAnimationDuration = animationDuration;
+    }
+
+    private void setHeaderLayout(View headerView) {
+        mHeaderView = headerView;
+        inflateHeader(mHeaderView);
+    }
 
 
     public ExpandablePanel(Context context) {
         super(context);
-        init();
+        init(null);
+
     }
 
     public ExpandablePanel(Context context, AttributeSet attrs) {
@@ -40,10 +64,6 @@ public class ExpandablePanel extends LinearLayout {
         init(attrs);
     }
 
-    public void init() {
-        init(null);
-    }
-
     private void init(AttributeSet attrs) {
         View mainView = inflate(getContext(), R.layout.expandable_panel, this);
         mHeaderContainerView = (LinearLayout) mainView.findViewById(R.id.header);
@@ -52,24 +72,45 @@ public class ExpandablePanel extends LinearLayout {
                 attrs,
                 R.styleable.ExpandablePanel);
         try {
-            setContentLayout(attributeSet.getResourceId(R.styleable.ExpandablePanel_content_view, -1));
-            setHeaderLayout(attributeSet.getResourceId(R.styleable.ExpandablePanel_headerView, R.layout.default_header_view));
-            mCollapseExpandSwitch = (ImageView) mainView.findViewById(R.id.expand_collapse_switch);
-            if (mCollapseExpandSwitch != null) {
-                mCollapseExpandSwitch.setOnClickListener(new OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        mIsCollapsed = !mIsCollapsed;
-                        expandOrCollapse();
-                    }
-                });
+
+            mUseDefaultHeaderView = attributeSet.getBoolean(R.styleable.ExpandablePanel_useDefaultHeaderView, true);
+            mSwitchId = attributeSet.getString(R.styleable.ExpandablePanel_expandCollapseSwitchId);
+            if (mUseDefaultHeaderView) {
+                setUseDefaultHeaderView(true);
+            } else {
+                setHeaderLayout(attributeSet.getResourceId(R.styleable.ExpandablePanel_headerView, -1));
+                setSwitch(mHeaderContainerView);
             }
+            setContentLayout(attributeSet.getResourceId(R.styleable.ExpandablePanel_content_view, -1));
+            mAnimationDuration = attributeSet.getInteger(R.styleable.ExpandablePanel_expandAnimationDuration, DEFAULT_ANIMATION_DURATION);
+
 
         } catch (android.content.res.Resources.NotFoundException e) {
             e.printStackTrace();
         }
         //Don't forget this
         attributeSet.recycle();
+    }
+
+    private void setSwitch(LinearLayout headerContainerView) {
+        Resources res = getContext().getResources();
+        int id = res.getIdentifier(mSwitchId, "id", getContext().getPackageName());
+        View switchView = mHeaderContainerView.findViewById(id);
+        setCollapseExpandSwitch(switchView);
+
+    }
+
+    private void setCollapseExpandSwitch(View collapseExpandSwitch) {
+        mCollapseExpandSwitch = collapseExpandSwitch;
+        if (mCollapseExpandSwitch != null) {
+            mCollapseExpandSwitch.setOnClickListener(new OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    mIsCollapsed = !mIsCollapsed;
+                    expandOrCollapse();
+                }
+            });
+        }
     }
 
     private void setHeaderLayout(int headerViewResourceId) {
@@ -80,18 +121,18 @@ public class ExpandablePanel extends LinearLayout {
 
     private void expandOrCollapse() {
         if (mIsCollapsed)
-            expand(mContentContainerView);
+            expand(mContentContainerView, mAnimationDuration);
         else
-            collapse(mContentContainerView);
+            collapse(mContentContainerView, mAnimationDuration);
 
     }
 
-    public void setHeaderText(TextView headerText) {
-        mHeaderText = headerText;
+    public void setDefaultHeaderTextView(TextView defaultHeaderTextView) {
+        mDefaultHeaderTextView = defaultHeaderTextView;
     }
 
-    public void setSubHeader(TextView subHeader) {
-        mSubHeader = subHeader;
+    public void setDefaultSubHeaderTextView(TextView defaultSubHeaderTextView) {
+        mDefaultSubHeaderTextView = defaultSubHeaderTextView;
     }
 
     public void setCollapseExpandSwitch(ImageView collapseExpandSwitch) {
@@ -106,17 +147,19 @@ public class ExpandablePanel extends LinearLayout {
 
     private void inflateContent(View view) {
         if (mContentContainerView != null && view != null) {
+            mContentContainerView.removeAllViews();
             mContentContainerView.addView(view);
         }
     }
 
     private void inflateHeader(View view) {
         if (mHeaderContainerView != null && view != null) {
+            mHeaderContainerView.removeAllViews();
             mHeaderContainerView.addView(view);
         }
     }
 
-    public static void expand(final View v) {
+    public static void expand(final View v, long animationDuration) {
         v.measure(LayoutParams.MATCH_PARENT, LayoutParams.WRAP_CONTENT);
         final int targetHeight = v.getMeasuredHeight();
 
@@ -137,11 +180,11 @@ public class ExpandablePanel extends LinearLayout {
                 return true;
             }
         };
-        a.setDuration(ANIMATION_DURATION);
+        a.setDuration(animationDuration);
         v.startAnimation(a);
     }
 
-    public static void collapse(final View v) {
+    public static void collapse(final View v, long animationDuration) {
         final int initialHeight = v.getMeasuredHeight();
 
         Animation a = new Animation() {
@@ -162,7 +205,7 @@ public class ExpandablePanel extends LinearLayout {
         };
 
         // 1dp/ms
-        a.setDuration(ANIMATION_DURATION);
+        a.setDuration(animationDuration);
         v.startAnimation(a);
     }
 
